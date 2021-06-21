@@ -13,5 +13,6 @@ urlpatterns = [
                   path('category/<str:category_slug>/', CategoryPostView.as_view(), name='category_post'),
                   path('tag/<str:tag_slug>/', TagPostView.as_view(), name='tag_post'),
                   path('search/', SearchPostView.as_view(), name='search_post'),
+                  path('contact/', views.contact),
                   path('post/<int:pk>/like/', views.like),
               ]
