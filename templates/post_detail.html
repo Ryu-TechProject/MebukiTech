@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ post.title }}</h2>
+<small class="text-muted">HOME > {{ post.category }} > {{ post.title }}</small>
+    <br>
+<small class="text-muted">{{ post.updated_at|date:"Y M d" }}日更新</small>
+    <br>
+    <br>
+{% if post.catch_image %}
+<img src = "{{ post.catch_image }}" width="600" height="400">
+{% endif %}
+<br><br>
+{{ post.main|safe }}
+    <br>
+    {% for tag in post.tags.all %}
+        <a href="{% url 'MebukiTechapp:tag_post' tag.slug %}" class="text-info">#{{ tag.name }}</a>
+    {% endfor %}
+    <br><br>
+    <div>
+    {% comment %} コメント投稿/表示 {% endcomment %}
+        <h3 class="h6">コメント</h3>
+        <div class="list-group">
+            {% for comment in comments %}
+            <a class="list-group-item list-group-item-action p-3 rounded-0">
+                <p class= "m-0"><small>{{ comment.comment }}</small></p>
+                <p class= "m-0"><small>{{ comment.created_at }}</small></p>
+            </a>
+            {% endfor %}
+        </div>
+        <form method="POST" class="my-4">
+            {% csrf_token %}
+            <div class="mb-2">
+                <label>コメント投稿</label>
+                <textarea name="comment" class="rounded-0 bg-light form-control" rows="3"></textarea>
+            </div>
+            <div class="text-right">
+                <!-- <button class="btn btn-primary btn-block my-3" type="submit">コメントする</button> -->
+                <button class="btn btn-sm btn-outline-success" type="submit">コメントする</button>
+            </div>
+        </form>
+    </div>
+    {% comment %} コメント投稿/表示 {% endcomment %}
+    {% comment %} いいねボタン表示 {% endcomment %}
+    {% comment %} <form method="POST" class="d-inline">
+        {% csrf_token %}
+        <input type="hidden" name="like_count" value="true">
+        <button type="submit" class="btn btn-sm btn-outline-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-fill" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
+            </svg>
+            {{ post.like_count }} good
+        </button>
+    </form> {% endcomment %}
+    <div class="d-inline">
+        <button id="like_btn" type="button" class="btn btn-sm btn-outline-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-fill" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
+            </svg>
+            <span id="like_count">{{ post.like_count }}</span> good
+        </button>
+    </div>
+<script>
+    window.addEventListener("DOMContentLoaded", (event) => {
+ 
+        var likeBtn = document.getElementById("like_btn");
+        likeBtn.addEventListener('click', (event) => {
+            // 送信先URL
+            var url = "/post/{{ post.id }}/like/";
+            // csrftokenの取得
+            var csrfToken = getCookie("csrftoken");
+            // 送信したいデータがある場合
+            var data = {};
+ 
+ 
+            fetch(url, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: JSON.stringify(data),
+            })
+            .then(Response => Response.json())
+            .then(data => {
+                if (data["message"] === "success") {
+                    var likeCount = document.getElementById("like_count");
+                    likeCount.innerText = (Number(likeCount.innerText)+1).toString();
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+ 
+        }, false);
+ 
+ 
+ 
+    }, false);
+ 
+ 
+ 
+function getCookie(name) {
+    if (document.cookie && document.cookie !== "") {
+        for (var cookie of document.cookie.split(';')) {
+            var [key, value] = cookie.trim().split("=");
+            if (key === name) {
+                return decodeURIComponent(value);
+            }
+        }
+    }
+    return null;
+}
+ 
+</script>
+    {% comment %} いいねボタン表示 {% endcomment %}
+    <br><br><br>
+    <h3>関連記事</h3>
+    <div class="row row-cols-3 row-cols-md-3 ">
+    {% for relation in post.relation.all %}
+        <div class="card my-3">
+                {% if relation.catch_image %}
+                    <a href="{% url 'MebukiTechapp:post_detail' relation.pk %}"> <img src = "{{ relation.catch_image }}" class="card-img img-thumbnail img-fluid" alt="{{ catch_image_alt }}" ></a>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title"><a class="text-muted text-decoration-none" href="{% url 'MebukiTechapp:post_detail' relation.pk %}">{{ relation.title }}</a></h5>
+                </div>
+            </div>
+    {% endfor %}
+    </div>
+{% endblock content %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+{#            <h2 class="md-4">「{% if query %}{{ query }}{% endif %}」　の検索結果</h2　使用できないため削除#}
+            <h2 class="md-4">「{{ request.GET.q }}」の検索結果</h2>
+{#                <h2 class="md-4">「{{ object_list }}」　の検索結果</h2>　取得した記事の一覧が見える#}
+            <p class="text-dark">{{ page_obj.start_index }}-{{ page_obj.end_index }}件 {{ paginator.count }}件</p>
+            {% for post in object_list %}
+                {% if user.is_authenticated or post.public_report %}
+                    {% if not post.public_report %}<h3>下書き</h3>{% endif %}
+            <div class="card col-mb-offset-3" style="width: 100%">
+                <div class="row no-gutters">
+                    <div class="col-md-4">
+                        {% if post.catch_image %}
+                            <a href="{% url 'MebukiTechapp:post_detail' post.pk %}"> <img src = "{{ post.catch_image }}" class="card-img img-thumbnail img-fluid" alt="{{ catch_image_alt }}" width="100%" height="100%"></a>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text">{{ post.summary }}・・・</p>
+                            <p class="card-text"><small class="text-muted">{{ post.created_at }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                {% endif %}
+                <br><br>
+            {% endfor %}
+            {% include "pagination.html" %}
+    </div>
+</div>
+{% endblock content %}
